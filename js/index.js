@@ -1,0 +1,67 @@
+const postsdiv= document.getElementById("postari");
+const searchBtn= document.getElementById("search-btn");
+const searchIn= document.getElementById("search-input");
+
+searchBtn.onclick=function(){
+    let text=searchIn.value;
+    window.location='pages/postari.html?text='+text;
+}
+
+searchIn.onkeydown=function(e){
+    if(e.keyCode==13){
+        let text=searchIn.value;
+        window.location='pages/postari.html?text='+text;
+    }
+}
+
+function getLastPosts(){
+    postDB.orderBy('created','desc')
+        .limit(6).onSnapshot(processSnapshot);
+}
+
+function processSnapshot(snapshot){
+    let items= [];
+    let docs=snapshot.docs;
+
+    for(let i=0; i<docs.length; i++){
+        let postare={};
+        postare.id=docs[i].id;
+        postare.data=docs[i].data();
+        items.push(postare);
+    }
+    console.log(items);
+
+    renderPosts(items);
+}
+
+function renderPosts(items){
+    let html="";
+    for (let i=0; i<items.length; i++){
+        let p=items[i];
+        html += `
+                <a class="postare" href="pages/postare.html?id=${p.id}">
+                    <img src="${p.data.image}">
+                    <div class="postare-info">
+                        <h4>${p.data.title}</h4>
+                        <p>${p.data.short}</p>
+    
+                        <div class="sursa-postare">
+                            <div class="sursa-info">
+                                ${p.data.username}
+                                <br>
+                                ${formatDate(p.data.created)}
+                            </div>
+                        </div>
+
+                        <div class="short-likes">
+                            <i class="fas fa-heart"></i>
+                            <span>${p.data.likes.length}</span>
+                        </div>
+                    </div>
+                </a>
+        `
+    }
+    postsdiv.innerHTML=html;
+}
+
+getLastPosts();
